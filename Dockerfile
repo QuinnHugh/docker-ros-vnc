@@ -29,15 +29,6 @@ RUN groupadd $USER && \
     usermod  --uid $UID $USER && \
     groupmod --gid $GID $USER
 
-### Install VScode
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
-    sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/ && \
-    sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-
-RUN sudo apt-get install -y apt-transport-https && \
-    sudo apt-get update && \
-    sudo apt-get install -y code
-
 ### VNC Installation
 LABEL io.k8s.description="VNC Container with ROS with Xfce window manager" \
       io.k8s.display-name="VNC Container with ROS based on Ubuntu" \
@@ -80,10 +71,6 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 RUN $INST_SCRIPTS/tigervnc.sh
 RUN $INST_SCRIPTS/no_vnc.sh
 
-## Install firefox and chrome browser
-RUN $INST_SCRIPTS/firefox.sh
-RUN $INST_SCRIPTS/chrome.sh
-
 ## Install xfce UI
 RUN $INST_SCRIPTS/xfce_ui.sh
 ADD ./src/common/xfce/ $HOME/
@@ -115,29 +102,27 @@ RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb
     apt-get install -y gazebo9 libgazebo9-dev && \
     apt-get install -y ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
 
-# Setup ROS
+# Install argos
+ADD ./argos3/ $HOME/argos3
+ADD ./argos3-examples/ $HOME/argos3-examples
+RUN cd $HOME/argos3 && \
+    mkdir build && cd build && \
+    cmake ../src && make && make doc && make install && \
+
+# Setup ROS & argos
 USER $USER
 RUN rosdep fix-permissions && rosdep update
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 RUN /bin/bash -c "source ~/.bashrc"
-
-###Tensorflow Installation
-# Install pip
-USER root
-RUN apt-get install -y wget python-pip python-dev libgtk2.0-0 unzip libblas-dev liblapack-dev libhdf5-dev && \
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python get-pip.py
-
-# prepare default python 2.7 environment
-USER root
-RUN pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.11.0-cp27-none-linux_x86_64.whl && \
-    pip install keras==2.2.4 matplotlib pandas scipy h5py testresources scikit-learn
+RUN echo $(awk 'NR==3' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
+    echo $(awk 'NR==5' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
+    /bin/bash -c "source ~/.bashrc" && \
+    cd $HOME/argos3-examples && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Debug .. && make 
 
 # Expose Tensorboard
 EXPOSE 6006
-
-# Expose Jupyter 
-EXPOSE 8888
 
 ### Switch to root user to install additional software
 USER $USER
