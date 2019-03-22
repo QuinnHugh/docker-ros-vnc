@@ -107,7 +107,7 @@ ADD ./argos3/ $HOME/argos3
 ADD ./argos3-examples/ $HOME/argos3-examples
 RUN cd $HOME/argos3 && \
     mkdir build && cd build && \
-    cmake ../src && make && make doc && make install && \
+    cmake ../src && make && make doc && make install
 
 # Setup ROS & argos
 USER $USER
