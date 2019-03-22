@@ -114,7 +114,7 @@ USER $USER
 RUN rosdep fix-permissions && rosdep update
 RUN echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 RUN echo $(awk 'NR==3' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
-    echo $(awk 'NR==5' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
+    echo $(awk 'NR==5' ~/argos3/build/setup_env.sh) >> ~/.bashrc
 RUN /bin/bash -c "source ~/.bashrc"
 
 USER root
