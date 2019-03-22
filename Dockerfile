@@ -117,10 +117,10 @@ RUN echo $(awk 'NR==3' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
     echo $(awk 'NR==5' ~/argos3/build/setup_env.sh) >> ~/.bashrc
 RUN /bin/bash -c "source ~/.bashrc"
 
-USER root
-RUN cd $HOME/argos3-examples && \
-    mkdir build && cd build && \
-    cmake -DCMAKE_BUILD_TYPE=Debug .. && make 
+#USER root
+#RUN cd $HOME/argos3-examples && \
+#    mkdir build && cd build && \
+#    cmake -DCMAKE_BUILD_TYPE=Debug .. && make 
 # Expose Tensorboard
 EXPOSE 6006
 
