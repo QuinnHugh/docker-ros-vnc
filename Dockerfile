@@ -86,7 +86,10 @@ RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
 RUN apt-get update && \
     apt-get install -y vim \
     tmux \
-    git
+    git \
+    cmake libfreeimage-dev libfreeimageplus-dev \
+    qt5-default freeglut3-dev libxi-dev libxmu-dev liblua5.2-dev \
+    lua5.2 doxygen graphviz graphviz-dev asciidoc
 
 # Install ROS
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list' && \
@@ -117,10 +120,11 @@ RUN echo $(awk 'NR==3' ~/argos3/build/setup_env.sh) >> ~/.bashrc && \
     echo $(awk 'NR==5' ~/argos3/build/setup_env.sh) >> ~/.bashrc
 RUN /bin/bash -c "source ~/.bashrc"
 
-#USER root
-#RUN cd $HOME/argos3-examples && \
-#    mkdir build && cd build && \
-#    cmake -DCMAKE_BUILD_TYPE=Debug .. && make 
+USER root
+RUN cd $HOME/argos3-examples && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Debug .. && make 
+
 # Expose Tensorboard
 EXPOSE 6006
 
